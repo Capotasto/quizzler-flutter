@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'QuestionManager.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() => runApp(Quizzler());
+
+enum Status { Collect, Wrong }
+
+var questionManager = new QuestionManager();
 
 class Quizzler extends StatelessWidget {
   @override
@@ -25,6 +31,41 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  List<Widget> scoreKeeper = [];
+
+  Widget makeScore(Status status) {
+    return Icon((status == Status.Collect) ? Icons.check : Icons.close,
+        color: (status == Status.Collect) ? Colors.green : Colors.red);
+  }
+
+  void showAlertDialog(BuildContext context) {
+    Alert(
+      context: context,
+      type: AlertType.info,
+      title: "Notice",
+      desc: "The question is over",
+      buttons: [
+        DialogButton(
+          color: Colors.grey,
+          child: Text(
+            'OK',
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+            reset();
+          },
+        ),
+      ],
+    ).show();
+  }
+
+  void reset() {
+    setState(() {
+      questionManager.reset();
+      scoreKeeper.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -37,7 +78,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                'This is where the question text will go.',
+                questionManager.getQuestionText,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -61,7 +102,17 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                //The user picked true.
+                if (questionManager.isLastQuestion) {
+                  showAlertDialog(context);
+                  return;
+                }
+                var status = questionManager.getQuestionResult
+                    ? Status.Collect
+                    : Status.Wrong;
+                setState(() {
+                  scoreKeeper.add(makeScore(status));
+                  questionManager.upQuestionCount;
+                });
               },
             ),
           ),
@@ -79,19 +130,25 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                //The user picked false.
+                if (questionManager.isLastQuestion) {
+                  showAlertDialog(context);
+                  return;
+                }
+                var status = questionManager.getQuestionResult
+                    ? Status.Wrong
+                    : Status.Collect;
+                setState(() {
+                  scoreKeeper.add(makeScore(status));
+                  questionManager.upQuestionCount;
+                });
               },
             ),
           ),
         ),
-        //TODO: Add a Row here as your score keeper
+        Row(
+          children: scoreKeeper,
+        ),
       ],
     );
   }
 }
-
-/*
-question1: 'You can lead a cow down stairs but not up stairs.', false,
-question2: 'Approximately one quarter of human bones are in the feet.', true,
-question3: 'A slug\'s blood is green.', true,
-*/
