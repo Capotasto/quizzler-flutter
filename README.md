@@ -4,7 +4,7 @@
 # Quizzler ❓
 
 ## Here is my result
-![Result App](https://github.com/Capotasto/quizzler-flutter/screen_shots/result.gif)
+![Result App](https://github.com/Capotasto/quizzler-flutter/blob/master/screen_shots/result.gif)
 
 
 ## Our Goal
